@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="118da4a0d7534776bdec95f448ee6c28" Name="Diagram1">
+        <EntityTypeShape EntityType="bancomat2Model.Admin" Width="1.5" PointX="3" PointY="2.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="bancomat2Model.Banche" Width="1.5" PointX="0.75" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="bancomat2Model.Banche_Funzionalita" Width="1.5" PointX="6" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="bancomat2Model.ContiCorrente" Width="1.5" PointX="5.25" PointY="8.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="bancomat2Model.Funzionalita" Width="1.5" PointX="3.75" PointY="5.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="bancomat2Model.Movimenti" Width="1.5" PointX="5.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="bancomat2Model.Utenti" Width="1.5" PointX="3" PointY="8" IsExpanded="true" />
+        <AssociationConnector Association="bancomat2Model.FK_Admins_Banche" ManuallyRouted="false" />
+        <AssociationConnector Association="bancomat2Model.FK_Banche_Funzionalita_Banche" ManuallyRouted="false" />
+        <AssociationConnector Association="bancomat2Model.FK_Utenti_Banche" ManuallyRouted="false" />
+        <AssociationConnector Association="bancomat2Model.FK_Banche_Funzionalita_Funzionalita" ManuallyRouted="false" />
+        <AssociationConnector Association="bancomat2Model.FK_ContiCorrente_Utenti" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
