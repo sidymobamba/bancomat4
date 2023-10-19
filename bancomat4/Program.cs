@@ -19,25 +19,39 @@ namespace bancomat2
                 {
                     Console.Clear();
                     Banche banca = SelezionaBanca(context);
-                    Utenti utenteAutenticato = Login(context, banca);
-                    Admin adminAutenticato = LoginAdmin(context, banca);
 
+                    Console.WriteLine("Clicca U se sei utente e A se sei Admin:");
+                    string userType = Console.ReadLine();
 
-                    if (utenteAutenticato != null)
+                    if (userType.ToUpper() == "U")
                     {
-                        Console.WriteLine($"Benvenuto, {utenteAutenticato.NomeUtente}!");
-
-                        // Entra nel menu principale
-                        continua = MenuPrincipale(context, utenteAutenticato, banca);
+                        Utenti utenteAutenticato = Login(context, banca);
+                        if (utenteAutenticato != null)
+                        {
+                            Console.WriteLine($"Benvenuto, {utenteAutenticato.NomeUtente}!");
+                            continua = MenuPrincipale(context, utenteAutenticato, banca);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Accesso negato. Utente bloccato o dati di accesso errati.");
+                        }
                     }
-                    else if (adminAutenticato != null)
+                    else if (userType.ToUpper() == "A")
                     {
-                        Console.WriteLine($"Benvenuto, {adminAutenticato.NomeUtente}!");      
-                        continua = AdminMenu(context, banca);
+                        Admin adminAutenticato = LoginAdmin(context, banca);
+                        if (adminAutenticato != null)
+                        {
+                            Console.WriteLine($"Benvenuto, {adminAutenticato}!");
+                            continua = AdminMenu(context, banca);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Accesso negato. Admin bloccato o dati di accesso errati.");
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("Accesso negato. Utente bloccato o dati di accesso errati.");
+                        Console.WriteLine("Selezione non valida. Riprova.");
                     }
                 }
             }
@@ -95,6 +109,7 @@ namespace bancomat2
             }
 
             Console.WriteLine("Utente bloccato. Contatta l'assistenza.");
+            Console.ReadKey();
             utente.Bloccato = true;
             context.SaveChanges();
 
@@ -127,8 +142,6 @@ namespace bancomat2
             }
         }
 
-
-
         static void MostraBancheDisponibili(bancomat2Entities context)
         {
             var banche = context.Banches.ToList();
@@ -150,6 +163,7 @@ namespace bancomat2
                     .FirstOrDefault(u => u.IdBanca == banca.Id &&
                     u.NomeUtente.Equals(nomeUtente, StringComparison.OrdinalIgnoreCase));
         }
+
         static Admin SelezionaAdmin(bancomat2Entities context, Banche banca, string nomeUtente)
         {
             return context.Admins
@@ -161,79 +175,12 @@ namespace bancomat2
         {
             return utente.Password == password;
         }
+
         static bool AutenticaAdmin(Admin admin, string password)
         {
             return admin.Password == password;
         }
 
-        static string SelezionaBanca()
-        {
-            Console.WriteLine("Benvenuto a Bankomat!");
-            Console.WriteLine("Seleziona una banca:");
-
-            using (var context = new bancomat2Entities())
-            {
-                var banche = context.Banches.Select(b => b.Nome).ToList();
-
-                for (int i = 0; i < banche.Count; i++)
-                {
-                    Console.WriteLine($"{i + 1}. {banche[i]}");
-                }
-
-                int scelta;
-                if (int.TryParse(Console.ReadLine(), out scelta) && scelta >= 1 && scelta <= banche.Count)
-                {
-                    return banche[scelta - 1];
-                }
-            }
-
-            return null;
-        }
-
-        static bool AutenticazioneUtente(bancomat2Entities context, string nomeBanca)
-        {
-            Console.WriteLine("Inserisci il tuo nome utente:");
-            string nomeUtente = Console.ReadLine();
-            Console.WriteLine("Inserisci la tua password:");
-            string password = Console.ReadLine();
-
-            var utente = context.Utentis.FirstOrDefault(u => u.NomeUtente == nomeUtente && u.Banche.Nome == nomeBanca);
-            var admin = context.Admins.FirstOrDefault(u => u.NomeUtente == nomeUtente && u.Banche.Nome == nomeBanca);
-
-            if (utente != null || admin != null)
-            {
-                if (!utente.Bloccato)
-                {
-                    if (utente.Password == password || admin.Password == password)
-                    {
-                        Console.WriteLine("Accesso riuscito. Benvenuto!");
-                        return true; // Utente autenticato con successo
-                    }
-                    else
-                    {
-                        Console.WriteLine("Password errata. Riprova.");
-                        // Aggiorna il conteggio dei tentativi falliti per l'utente
-                        utente.TentativiFalliti++;
-                        if (utente.TentativiFalliti >= 3)
-                        {
-                            Console.WriteLine("Hai superato il limite di tentativi falliti. L'utente verrà bloccato.");
-                            utente.Bloccato = true;
-                        }
-                        context.SaveChanges(); 
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("L'utente è bloccato. Contatta l'assistenza.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Utente non trovato. Riprova.");
-            }
-
-            return false; // Autenticazione fallita
-        }
         static bool MenuPrincipale(bancomat2Entities context, Utenti utenteAutenticato, Banche banca)
         {
             long[] funzionalita = ServiziDisponibili(context, banca);
@@ -323,49 +270,6 @@ namespace bancomat2
                           .ToArray();
         }
 
-        static void MostraMenuPrincipale(bancomat2Entities context, Utenti utenteAutenticato)
-        {
-            while (true)
-            {
-                Console.WriteLine("\nMenu Principale:");
-                Console.WriteLine("1. Versamento");
-                Console.WriteLine("2. Report Saldo");
-                Console.WriteLine("3. Prelievo");
-                Console.WriteLine("4. Registro Operazioni");
-                Console.WriteLine("5. Logout");
-                Console.Write("Scelta: ");
-
-                if (int.TryParse(Console.ReadLine(), out int scelta))
-                {
-                    switch (scelta)
-                    {
-                        case 1:
-                            EseguiVersamento(context, utenteAutenticato);
-                            break;
-                        case 2:
-                            MostraReportSaldo(context, utenteAutenticato);
-                            break;
-                        case 3:
-                            EseguiPrelievo(context, utenteAutenticato);
-                            break;
-                        case 4:
-                            MostraRegistroOperazioni(context, utenteAutenticato);
-                            break;
-                        case 5:
-                            Console.WriteLine("Logout effettuato.");
-                            return; // Uscita dal menu principale
-                        default:
-                            Console.WriteLine("Scelta non valida.");
-                            break;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Scelta non valida.");
-                }
-            }
-        }
-
         static void EseguiVersamento(bancomat2Entities context, Utenti utenteAutenticato)
         {
             Console.Write("Inserisci l'importo da versare: ");
@@ -378,10 +282,8 @@ namespace bancomat2
 
                     if (contoCorrente != null)
                     {
-                        // Aggiorna il saldo del conto corrente
                         contoCorrente.Saldo += importo;
 
-                        // Aggiorna la data dell'ultima operazione
                         contoCorrente.DataUltimaOperazione = DateTime.Now;
 
                         // Registra l'operazione nel database
@@ -421,7 +323,6 @@ namespace bancomat2
 
         static void MostraReportSaldo(bancomat2Entities context, Utenti utenteAutenticato)
         {
-            // Cerca il conto corrente dell'utente nel database
             var contoCorrente = context.ContiCorrentes.FirstOrDefault(c => c.IdUtente == utenteAutenticato.Id);
 
             if (contoCorrente != null)
@@ -446,20 +347,16 @@ namespace bancomat2
             {
                 if (importo > 0)
                 {
-                    // Cerca il conto corrente dell'utente nel database
                     var contoCorrente = context.ContiCorrentes.FirstOrDefault(c => c.IdUtente == utenteAutenticato.Id);
 
                     if (contoCorrente != null)
                     {
                         if (contoCorrente.Saldo >= importo)
                         {
-                            // Esegui il prelievo
                             contoCorrente.Saldo -= importo;
 
-                            // Aggiorna la data dell'ultima operazione
                             contoCorrente.DataUltimaOperazione = DateTime.Now;
 
-                            // Registra l'operazione nel database
                             var movimento = new Movimenti
                             {
                                 NomeBanca = utenteAutenticato.Banche.Nome,
@@ -502,12 +399,11 @@ namespace bancomat2
 
         static void MostraRegistroOperazioni(bancomat2Entities context, Utenti utenteAutenticato)
         {
-            // Verifica se la banca dell'utente ha la funzionalità "Registro Operazioni"
+            // Verifico se la banca dell'utente ha la funzionalità "Registro Operazioni"
             var banca = context.Banches.FirstOrDefault(b => b.Id == utenteAutenticato.IdBanca);
 
             if (banca != null && HaFunzionalitaRegistroOperazioni(context, banca))
             {
-                // Cerca tutte le operazioni dell'utente nel database
                 var operazioni = context.Movimentis
                     .Where(m => m.NomeBanca == utenteAutenticato.Banche.Nome && m.NomeUtente == utenteAutenticato.NomeUtente)
                     .ToList();
@@ -538,7 +434,7 @@ namespace bancomat2
 
         static bool HaFunzionalitaRegistroOperazioni(bancomat2Entities context, Banche banca)
         {
-            // Verifica se la banca ha la funzionalità "Registro Operazioni"
+            // Verifico se la banca ha la funzionalità "Registro Operazioni"
             return context.Banche_Funzionalita
                 .Any(bf => bf.IdBanca == banca.Id && bf.Funzionalita.Nome == "Registro Operazioni");
         }
@@ -578,7 +474,6 @@ namespace bancomat2
                 }
             }
         }
-
 
         static void SbloccaUtenteBloccato(bancomat2Entities context, Banche banca)
         {

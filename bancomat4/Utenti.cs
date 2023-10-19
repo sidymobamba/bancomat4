@@ -29,7 +29,5 @@ namespace bancomat4
         public virtual Banche Banche { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ContiCorrente> ContiCorrentes { get; set; }
-        public int TentativiFalliti { get; internal set; }
-        public string Ruolo { get; set; }
     }
 }
